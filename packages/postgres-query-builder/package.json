@@ -32,6 +32,9 @@
     "pg": "^8.10.0",
     "uniqid": "^5.3.0"
   },
+  "devDependencies": {
+    "@types/pg": "^8.7.3"
+  },
   "engines": {
     "node": ">= 18.0.0"
   }
