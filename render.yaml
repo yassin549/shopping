@@ -3,9 +3,6 @@ services:
   - type: pserv
     name: evershop-db
     plan: free
-    databaseName: evershop
-    user: evershop_user
-    version: "15"
 
   # EverShop Node.js Backend
   - type: web
