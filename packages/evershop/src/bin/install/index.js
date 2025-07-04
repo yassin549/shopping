@@ -21,12 +21,12 @@ import { hashPassword } from '../../lib/util/passwordHelper.js';
 // This command means for the developer who want to install the system on their local machine.
 async function install() {
   // Check if the env for database is set
-  if (process.env.DB_HOST) {
-    error(
-      'We found that you have already set the environment variables for the database. Look like you have already installed the system. Run `npm run build` and `npm run start` to launch your store.'
-    );
-    process.exit(0);
-  }
+  // if (process.env.DB_HOST) {
+  //   error(
+  //     'We found that you have already set the environment variables for the database. Look like you have already installed the system. Run `npm run build` and `npm run start` to launch your store.'
+  //   );
+  //   process.exit(0);
+  // }
 
   var db;
 
