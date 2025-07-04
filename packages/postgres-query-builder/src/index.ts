@@ -11,6 +11,8 @@ interface SQLValue {
 
 type Binding = Record<string, any>;
 
+
+
 class Select {
   _fields: string[] = [];
 
@@ -1110,20 +1112,20 @@ async function getConnection(pool: Pool): Promise<PoolClient> {
 
 async function startTransaction(connection: PoolClient): Promise<void> {
   await connection.query('BEGIN');
-  (connection as any).INTRANSACTION = true;
-  (connection as any).COMMITTED = false;
+  connection.INTRANSACTION = true;
+  connection.COMMITTED = false;
 }
 
 async function commit(connection: PoolClient): Promise<void> {
   await connection.query('COMMIT');
-  (connection as any).INTRANSACTION = false;
-  (connection as any).COMMITTED = true;
+  connection.INTRANSACTION = false;
+  connection.COMMITTED = true;
   release(connection);
 }
 
 async function rollback(connection: PoolClient): Promise<void> {
   await connection.query('ROLLBACK');
-  (connection as any).INTRANSACTION = false;
+  connection.INTRANSACTION = false;
   connection.release();
 }
 
@@ -1132,7 +1134,7 @@ function release(connection: PoolClient | Pool): void {
   if (connection instanceof Pool) {
     return;
   }
-  if ((connection as any).INTRANSACTION === true) {
+  if (connection.INTRANSACTION === true) {
     return;
   }
   connection.release();
