@@ -10,7 +10,7 @@ services:
     plan: free
     runtime: node
     # Build command: Install dependencies and compile the TypeScript source
-    buildCommand: "npm install && npm run compile"
+    buildCommand: 'npm install --include=dev && npm run compile'
     # Start command: Run the production server
     startCommand: "npm run start"
     envVars:
