@@ -1,4 +1,4 @@
-import { PoolClient as PgPoolClient, Pool, QueryResult } from 'pg';
+import { PoolClient, Pool, QueryResult } from 'pg';
 import uniqid from 'uniqid';
 import { fieldResolve } from './fieldResolve.js';
 import { isValueASQL } from './isValueASQL.js';
@@ -10,11 +10,6 @@ interface SQLValue {
 }
 
 type Binding = Record<string, any>;
-
-interface PoolClient extends PgPoolClient {
-  INTRANSACTION?: boolean;
-  COMMITTED?: boolean;
-}
 
 class Select {
   _fields: string[] = [];
@@ -1115,20 +1110,20 @@ async function getConnection(pool: Pool): Promise<PoolClient> {
 
 async function startTransaction(connection: PoolClient): Promise<void> {
   await connection.query('BEGIN');
-  connection.INTRANSACTION = true;
-  connection.COMMITTED = false;
+  (connection as any).INTRANSACTION = true;
+  (connection as any).COMMITTED = false;
 }
 
 async function commit(connection: PoolClient): Promise<void> {
   await connection.query('COMMIT');
-  connection.INTRANSACTION = false;
-  connection.COMMITTED = true;
+  (connection as any).INTRANSACTION = false;
+  (connection as any).COMMITTED = true;
   release(connection);
 }
 
 async function rollback(connection: PoolClient): Promise<void> {
   await connection.query('ROLLBACK');
-  connection.INTRANSACTION = false;
+  (connection as any).INTRANSACTION = false;
   connection.release();
 }
 
@@ -1137,7 +1132,7 @@ function release(connection: PoolClient | Pool): void {
   if (connection instanceof Pool) {
     return;
   }
-  if (connection.INTRANSACTION === true) {
+  if ((connection as any).INTRANSACTION === true) {
     return;
   }
   connection.release();
