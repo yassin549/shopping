@@ -100,23 +100,36 @@ async function install() {
   };
 
   // We will try with SSL option enabled first
-  let pool = new Pool({ ...baseDBSetting, ssl: true });
+  let pool;
   let sslMode;
 
   // Test the secure connection
   try {
+    // First, try with the strictest SSL setting
+    pool = new Pool({ ...baseDBSetting, ssl: { rejectUnauthorized: true } });
     await pool.query(`SELECT 1`);
     sslMode = 'require';
   } catch (e) {
-    if (e.message.includes('does not support SSL')) {
-      // If the database does not support SSL, we will try to connect without SSL
+    if (e.code === 'DEPTH_ZERO_SELF_SIGNED_CERT') {
+      // This error is common on cloud platforms like Render that use self-signed certs.
+      // We retry with a less strict SSL setting that allows them.
+      try {
+        pool = new Pool({ ...baseDBSetting, ssl: { rejectUnauthorized: false } });
+        await pool.query(`SELECT 1`);
+        sslMode = 'no-verify';
+      } catch (e2) {
+        error(
+          'Failed to connect to the database. Please check your connection details.'
+        );
+        error(e2);
+        process.exit(0);
+      }
+    } else if (e.message.includes('does not support SSL')) {
+      // If the database does not support SSL at all, we connect without it.
       pool = new Pool({ ...baseDBSetting, ssl: false });
       sslMode = 'disable';
-    } else if (e.message.includes('certificate')) {
-      error(
-        `Looks like your database server does not have a valid SSL certificate. Please turn off the SSL option in the database configuration, restart the database server and try again.`
-      );
     } else {
+      // For any other errors, we exit.
       error(e);
       process.exit(0);
     }
