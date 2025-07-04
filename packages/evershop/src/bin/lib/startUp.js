@@ -21,7 +21,8 @@ import { onListening } from './onListening.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const start = async function start(context, cb) {
+export const start = function start(context, cb) {
+  (async () => {
   const app = createApp();
   /** Create a http server */
   const server = http.createServer(app);
@@ -115,6 +116,16 @@ export const start = async function start(context, cb) {
     if (code === 100) {
       debug('Restarting the sever');
       process.send('RESTART_ME');
+    }
+  });
+  })().catch((e) => {
+    error(e);
+    // eslint-disable-next-line no-console
+    console.error(e);
+    if (cb) {
+      cb(e);
+    } else {
+      process.exit(1);
     }
   });
 };
